@@ -213,21 +213,57 @@ function renderCharts(bmi, calories, weight, goal) {
 async function generatePDF() {
     const { jsPDF } = window.jspdf;
     const element = document.getElementById('resultsArea');
+    const pdfBtn = document.getElementById('pdfBtn');
+
+    // 1. UI Cleanup before capture
+    pdfBtn.style.visibility = 'hidden'; // Hide button in PDF
     
-    // Use html2canvas to capture the styled dashboard
-    const canvas = await html2canvas(element, {
-        scale: 2,
-        backgroundColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#0f172a' : '#ffffff'
-    });
-    
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save('HappyMe-Health-Report.pdf');
+    try {
+        // 2. Capture with High Scale & Fixed Dimensions
+        const canvas = await html2canvas(element, {
+            scale: 2, // Improves clarity significantly
+            useCORS: true,
+            logging: false,
+            backgroundColor: getComputedStyle(document.body).backgroundColor,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        
+        // 3. Precise PDF Scaling Logic
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        
+        const margin = 10; // 10mm margin
+        const maxLineWidth = pageWidth - (margin * 2);
+        const maxLineHeight = pageHeight - (margin * 2);
+
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = imgWidth / imgHeight;
+
+        let width = maxLineWidth;
+        let height = width / ratio;
+
+        // If calculated height exceeds page height, scale down further
+        if (height > maxLineHeight) {
+            height = maxLineHeight;
+            width = height * ratio;
+        }
+
+        // 4. Add Image Centered
+        pdf.addImage(imgData, 'PNG', margin, margin, width, height);
+        pdf.save('Vitalis-Health-Report.pdf');
+
+    } catch (error) {
+        console.error("PDF Generation failed:", error);
+        document.getElementById('toast').innerText = "Failed to generate PDF";
+        document.getElementById('toast').classList.add('show');
+    } finally {
+        pdfBtn.style.visibility = 'visible';
+    }
 }
 
 function saveToLocal(inputs, results) {
