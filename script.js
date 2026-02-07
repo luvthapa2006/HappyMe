@@ -255,7 +255,7 @@ async function generatePDF() {
 
         // 4. Add Image Centered
         pdf.addImage(imgData, 'PNG', margin, margin, width, height);
-        pdf.save('Vitalis-Health-Report.pdf');
+        pdf.save('HappyMe-Health-Report.pdf');
 
     } catch (error) {
         console.error("PDF Generation failed:", error);
