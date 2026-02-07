@@ -215,61 +215,54 @@ async function generatePDF() {
     const element = document.getElementById('resultsArea');
     const pdfBtn = document.getElementById('pdfBtn');
 
-    // 1. Show loading state on button
-    pdfBtn.innerText = "Generating...";
-    pdfBtn.disabled = true;
-
+    // 1. UI Cleanup before capture
+    pdfBtn.style.visibility = 'hidden'; // Hide button in PDF
+    
     try {
-        // 2. Optimization for Mobile: Create a temporary container
-        // This forces the capture to happen as if it were a desktop-sized element
-        const clone = element.cloneNode(true);
-        clone.style.width = "800px"; // Fixed width for consistent layout
-        clone.style.position = "absolute";
-        clone.style.top = "-9999px";
-        clone.style.left = "0";
-        clone.querySelector('#pdfBtn').remove(); // Remove button from PDF
-        document.body.appendChild(clone);
-
-        // 3. Capture using optimized settings
-        const canvas = await html2canvas(clone, {
-            scale: 3, // Higher scale for ultra-sharpness
+        // 2. Capture with High Scale & Fixed Dimensions
+        const canvas = await html2canvas(element, {
+            scale: 2, // Improves clarity significantly
             useCORS: true,
-            allowTaint: true,
-            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
             logging: false,
-            onclone: (clonedDoc) => {
-                // Ensure charts are rendered in the clone
-                clonedDoc.getElementById('resultsArea').style.opacity = "1";
-                clonedDoc.getElementById('resultsArea').style.display = "block";
-            }
+            backgroundColor: getComputedStyle(document.body).backgroundColor,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
         });
 
-        const imgData = canvas.toDataURL('image/png', 1.0);
+        const imgData = canvas.toDataURL('image/png');
         
-        // 4. PDF Layout (A4)
+        // 3. Precise PDF Scaling Logic
         const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth() - 20; // 10mm margins
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-        // Add a header/footer to make it look premium
-        pdf.setFillColor(99, 102, 241); // Vitalis Blue
-        pdf.rect(0, 0, 210, 15, 'F');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
         
-        pdf.addImage(imgData, 'PNG', 10, 20, pdfWidth, pdfHeight);
-        
-        // Remove the temporary clone
-        document.body.removeChild(clone);
+        const margin = 10; // 10mm margin
+        const maxLineWidth = pageWidth - (margin * 2);
+        const maxLineHeight = pageHeight - (margin * 2);
 
-        // 5. Download
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = imgWidth / imgHeight;
+
+        let width = maxLineWidth;
+        let height = width / ratio;
+
+        // If calculated height exceeds page height, scale down further
+        if (height > maxLineHeight) {
+            height = maxLineHeight;
+            width = height * ratio;
+        }
+
+        // 4. Add Image Centered
+        pdf.addImage(imgData, 'PNG', margin, margin, width, height);
         pdf.save('HappyMe-Health-Report.pdf');
 
     } catch (error) {
-        console.error("PDF Error:", error);
-        alert("Report generation failed. Please try again.");
+        console.error("PDF Generation failed:", error);
+        document.getElementById('toast').innerText = "Failed to generate PDF";
+        document.getElementById('toast').classList.add('show');
     } finally {
-        pdfBtn.innerText = "Download PDF Report";
-        pdfBtn.disabled = false;
+        pdfBtn.style.visibility = 'visible';
     }
 }
 
