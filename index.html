@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy | Premium Health Insights</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">Happy<span>Me</span></div>
+            <button id="themeToggle" class="theme-btn">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="header">
+            <h1>Personalized Health Intelligence</h1>
+            <p>Get data-driven insights and a roadmap to your better self.</p>
+        </header>
+
+        <section class="dashboard-grid">
+            <div class="card form-card">
+                <form id="healthForm">
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>Age</label>
+                            <input type="number" id="age" required min="10" max="100" placeholder="Years">
+                        </div>
+                        <div class="input-group">
+                            <label>Gender</label>
+                            <select id="gender" required>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Height (cm)</label>
+                            <input type="number" id="height" required min="100" max="250" placeholder="cm">
+                        </div>
+                        <div class="input-group">
+                            <label>Weight (kg)</label>
+                            <input type="number" id="weight" required min="30" max="300" placeholder="kg">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Activity Level</label>
+                        <select id="activity" required>
+                            <option value="1.2">Sedentary (Little to no exercise)</option>
+                            <option value="1.375">Lightly Active (1-3 days/week)</option>
+                            <option value="1.55">Moderately Active (3-5 days/week)</option>
+                            <option value="1.725">Very Active (6-7 days/week)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Goal</label>
+                        <select id="goal" required>
+                            <option value="lose">Weight Loss (-500 kcal)</option>
+                            <option value="maintain">Maintain Health</option>
+                            <option value="gain">Weight Gain (+500 kcal)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Food Preference</label>
+                        <select id="preference" required>
+                            <option value="non-veg">Non-Vegetarian</option>
+                            <option value="veg">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="analyzeBtn">
+                        <span class="btn-text">Generate Health Plan</span>
+                        <div class="loader"></div>
+                    </button>
+                </form>
+            </div>
+
+            <div id="resultsArea" class="results-container hidden">
+                <div class="stats-grid">
+                    <div class="card stat-card" data-aos="fade-up">
+                        <span class="stat-label">Body Mass Index</span>
+                        <h2 id="bmiValue">--</h2>
+                        <span id="bmiStatus" class="badge">--</span>
+                    </div>
+                    <div class="card stat-card" data-aos="fade-up" data-aos-delay="100">
+                        <span class="stat-label">Daily Calories</span>
+                        <h2 id="calorieValue">--</h2>
+                        <span class="badge secondary">kcal/day</span>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card chart-card">
+                        <h3>BMI Analysis</h3>
+                        <canvas id="bmiChart"></canvas>
+                    </div>
+                    <div class="card chart-card">
+                        <h3>Weight Projection (4 Weeks)</h3>
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card plan-card">
+                    <div class="plan-header">
+                        <h3>Dietary Strategy</h3>
+                        <button id="pdfBtn" class="pdf-btn">Download PDF Report</button>
+                    </div>
+                    <div id="dietSummary" class="plan-content"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast">Please fill all fields correctly.</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
